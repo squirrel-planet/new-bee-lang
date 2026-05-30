@@ -165,6 +165,11 @@ class new_bee_lang_interpreter(object):
                         '每5句代码必须加一个 plese 语句！',
                         '蜜蜂们不喜欢偷懒的程序员！'
                     ], error_type = 'syntax')
+        if not tokens:
+            self.error_with_details([
+                '这个文件里居然没有一个有效代码！',
+                '蜜蜂们生气了！'
+            ])
         plese_ratio = float(plese_count) / len(tokens)
         if not (0.4 <= plese_ratio <= 0.5):
             self.error_with_details([
@@ -251,7 +256,7 @@ class new_bee_lang_interpreter(object):
             if tokens[1:] != ['New', 'Bee', 'Lang']:
                 self.error_with_details([
                     'hello 后面只能是 New Bee Lang！'
-                ])    
+                ])
             if self.hello:
                 self.error_with_details([
                     '你已经打了招呼！不能多次打招呼！',
