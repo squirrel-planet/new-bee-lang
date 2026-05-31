@@ -67,13 +67,23 @@ class new_bee_lang_interpreter(object):
                 '这代码比我奶奶的食谱还难懂！',
                 '如果代码能哭，它现在正在嚎啕大哭。',
                 '这不只是错误，这是对编程艺术的侮辱！',
-                '你的键盘是不是被蜜蜂蜇过？'
+                '你的键盘是不是被蜜蜂蜇过？',
+                '这语法错误气得蜜蜂都想蜇你。',
+                '蜜蜂筑巢都比你的代码有条理。',
+                '你的代码烂到蜜蜂都不愿意采蜜。',
+                '蜜蜂都比你懂得怎么组织代码。',
+                '你的代码像只无头蜜蜂乱撞。'
             ],
             'runtime': [
                 '/runtime_error: 你的人生选择正在受到质疑/',
                 '这只蜜蜂迷路了，就像你的代码逻辑一样。',
                 '错误 404：你的代码逻辑未找到。',
-                '这不是 bug，这是你代码的特色。'
+                '这不是 bug，这是你代码的特色。',
+                '蜜蜂表示你的代码没救了',
+                '蜜蜂迷路了，因为你的错误信息比花丛还乱。',
+                '这只蜜蜂说：你的代码比它的翅膀还脆弱。',
+                '错误：蜜蜂采蜜回来发现你的程序已经崩了。',
+                '连蜜蜂都知道怎么处理异常，你不知道？'
             ]
         }
 
@@ -147,7 +157,7 @@ class new_bee_lang_interpreter(object):
             if line.strip().startswith('#'):
                 continue
             for char in line:
-                if char not in '#abcdefghijklmnopqrstuvwxyzNBL "\'\n\t' and line[line.index(char) - 1] != "'":
+                if char not in '#abcdefghijklmnopqrstuvwxyzNBL +-*/"\'\n\t' and line[line.index(char) - 1] != "'":
                     self.error_with_details(
                         [f'字符 “{char}” 不允许使用'],
                         char = char,
@@ -532,9 +542,9 @@ class new_bee_lang_interpreter(object):
                     value1, value2 = bee1.value, bee2.value
                     exp = f'{value1} {op} {value2}'
                     if op in ['+', '-', '*', '/']:
-                        self.error_with_details([f'“{op} 是什么运算符？！”蜂蜜大喊道。'], f'do {op}')
+                        self.error_with_details([f'“{op} 是什么运算符？！”蜂蜜大喊道。'], f'compute {op}')
                     if value2 == '0' and op == '/':
-                        self.error_with_details(['你想毁灭世界吗？！居然除以 0！'], 'do /')
+                        self.error_with_details(['你想毁灭世界吗？！居然除以 0！'], 'compute /')
                     try:
                         egg_value = eval(exp)
                         self.next_bee_value = egg_value
