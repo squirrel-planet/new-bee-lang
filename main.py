@@ -1,11 +1,14 @@
 import sys
 import random
 import io
-import os
 from typing import List
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding = 'utf-8')
 sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding = 'utf-8')
+
+def print_msg(string):
+    if '--only_output' not in sys.argv:
+        print(string)
 
 def error(message_list: list) -> None:
     if message_list:
@@ -150,7 +153,7 @@ class new_bee_lang_interpreter(object):
     def run(self) -> None:
         lines: List[str] = self.code.split('\n')
         tokens = []
-        non_plese_count, plese_count = (0, 0)
+        non_please_count, please_count = (0, 0)
         for line in lines:
             if not line:
                 continue
@@ -164,15 +167,15 @@ class new_bee_lang_interpreter(object):
                         error_type = 'syntax'
                     )
             tokens.append(self.parse_tokens(line))
-            if tokens[-1][0] == 'plese':
-                plese_count += 1
-                non_plese_count += 1
+            if tokens[-1][0] == 'please':
+                please_count += 1
+                non_please_count += 1
             else:
-                non_plese_count = 0
-                if non_plese_count >= 5:
+                non_please_count = 0
+                if non_please_count >= 5:
                     self.error_with_details([
                         '蜜蜂们放弃了！',
-                        '每5句代码必须加一个 plese 语句！',
+                        '每5句代码必须加一个 please 语句！',
                         '蜜蜂们不喜欢偷懒的程序员！'
                     ], error_type = 'syntax')
         if not tokens:
@@ -180,11 +183,11 @@ class new_bee_lang_interpreter(object):
                 '这个文件里居然没有一个有效代码！',
                 '蜜蜂们生气了！'
             ])
-        plese_ratio = float(plese_count) / len(tokens)
-        if not (0.4 <= plese_ratio <= 0.5):
+        please_ratio = float(please_count) / len(tokens)
+        if not (0.4 <= please_ratio <= 0.5):
             self.error_with_details([
-                'plese 语句占比不正确！',
-                f'当前 plese 占比: {plese_ratio * 100:.1f}%',
+                'please 语句占比不正确！',
+                f'当前 please 占比: {please_ratio * 100:.1f}%',
                 '要求: 40% ~ 50%',
                 '蜜蜂们不喜欢不守规矩的程序员！'
             ], error_type = 'syntax')
@@ -240,13 +243,17 @@ class new_bee_lang_interpreter(object):
 
     def input(self) -> str:
         if self.input_value:
-            return self.input_value[0]
+            input_first = self.input_value[0]
+            self.input_value = self.input_value[1:]
+            return input_first
         else:
             self.input_value = input()
-        return self.input()
+            input_first = self.input_value[0]
+            self.input_value = self.input_value[1:]
+            return input_first
 
     def give_up(self):
-        print('\n程序结束。再见，愚蠢的人类！蜜蜂们要去采蜜了。')
+        print_msg('\n程序结束。再见，愚蠢的人类！蜜蜂们要去采蜜了。')
         sys.exit(0)
 
     def is_working_bee_slack(self) -> bool:
@@ -256,9 +263,9 @@ class new_bee_lang_interpreter(object):
         self.line_number += 1
         if not tokens:
             return
-        if tokens == ['plese']:
-            self.error_with_details(['看来只说 plese 而不说事的人蜂蜜是永远不会理他的呢！'], 'plese')
-        if tokens[0] == 'plese':
+        if tokens == ['please']:
+            self.error_with_details(['看来只说 please 而不说事的人蜂蜜是永远不会理他的呢！'], 'please')
+        if tokens[0] == 'please':
             tokens = tokens[1:]
         cmd = tokens[0]
         length = len(tokens)
@@ -377,8 +384,16 @@ class new_bee_lang_interpreter(object):
                 elif self.workspace_stack[-1].type == 'queen bee':
                     if not self.honey:
                         self.error_with_details(['没有蜂蜜了！后悔没有使用 get honey 命令吧！'], 'lay egg')
-                    self.honeycomb_stack.append(bee('egg', self.next_bee_value))
-                    self.next_bee_value = None
+                    if isinstance(self.next_bee_value, str):
+                        if len(self.next_bee_value) >= 2:
+                            bee_value_first = self.next_bee_value[0]
+                            self.next_bee_value = self.next_bee_value[1:]
+                        else:
+                            bee_value_first = self.next_bee_value
+                            self.next_bee_value = None
+                    else:
+                        bee_value_first = None
+                    self.honeycomb_stack.append(bee('egg', bee_value_first))
                     self.honey -= 1
                 elif self.is_working_bee_slack():
                     self.slack_error('lay egg')
@@ -541,13 +556,12 @@ class new_bee_lang_interpreter(object):
                     bee1, bee2 = self.honeycomb_stack[-2], self.honeycomb_stack[-1]
                     value1, value2 = bee1.value, bee2.value
                     exp = f'{value1} {op} {value2}'
-                    if op in ['+', '-', '*', '/']:
+                    if op not in ['+', '-', '*', '/']:
                         self.error_with_details([f'“{op} 是什么运算符？！”蜂蜜大喊道。'], f'compute {op}')
                     if value2 == '0' and op == '/':
                         self.error_with_details(['你想毁灭世界吗？！居然除以 0！'], 'compute /')
                     try:
-                        egg_value = eval(exp)
-                        self.next_bee_value = egg_value
+                        self.next_bee_value = str(eval(exp))
                     except TypeError:
                         self.error_with_details(
                             [f'蜂蜜飞了过来，说：“嗡嗡”（你太菜了），因为 {value1} 与 {value2} 不能进行 {op} 运算！'],
@@ -555,7 +569,9 @@ class new_bee_lang_interpreter(object):
                         )
                     except Exception:
                         self.error_with_details(
-                            ['看来计算出错了！蜜蜂们感同身受（难道你信吗？）！'], f'do {op}')
+                            ['看来计算出错了！蜜蜂们感同身受（难道你信吗？）！'],
+                            f'do {op}'
+                        )
             elif cmd == 'do':
                 if length > 3 and tokens[2] != 'give':
                     self.too_long_code_error(tokens[3:], tokens)
@@ -648,7 +664,7 @@ def main() -> None:
         error(['读取文件失败，蜜蜂们表示同情（并没有）'])
     interpreter = new_bee_lang_interpreter(code)
     interpreter.run()
-    print('\n程序结束。再见，愚蠢的人类！蜜蜂们要去采蜜了。')
+    print_msg('\n程序结束。再见，愚蠢的人类！蜜蜂们要去采蜜了。')
 
 if __name__ == '__main__':
     main()
