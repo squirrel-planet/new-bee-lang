@@ -565,12 +565,12 @@ class new_bee_lang_interpreter(object):
                     except TypeError:
                         self.error_with_details(
                             [f'蜂蜜飞了过来，说：“嗡嗡”（你太菜了），因为 {value1} 与 {value2} 不能进行 {op} 运算！'],
-                            f'do {op}'
+                            f'compute {op}'
                         )
                     except Exception:
                         self.error_with_details(
                             ['看来计算出错了！蜜蜂们感同身受（难道你信吗？）！'],
-                            f'do {op}'
+                            f' {op}'
                         )
             elif cmd == 'do':
                 if length > 3 and tokens[2] != 'give':
